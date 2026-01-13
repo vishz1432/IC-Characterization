@@ -286,6 +286,21 @@ print i(Vm)
 ### output:
 <img width="477" height="347" alt="image" src="https://github.com/user-attachments/assets/c7cacbbb-1c4d-4194-b60d-9e0854913023" />
 
+## 2.3 RC Circuits
+
+- An RC circuit is an electric circuit composed of resistors (R) and capacitors (C), which exhibit a time-dependent response to voltage or current changes. The fundamental time constant is defined as:
+```τ = R * C```, where ```τ``` (tau) represents the time constant in seconds, indicating how quickly the circuit charges or discharges.
+
+- In the Skywater SKY130 PDK, RC circuits are implemented using integrated resistors (e.g., ```sky130_fd_pr__res_high_po```) and capacitors (e.g., ```sky130_fd_pr__cap_mim_m3_1```). These are critical in analog and mixed-signal design applications such as filters, timing circuits, and analog front ends.
+
+
+<img width="425" height="366" alt="image" src="https://github.com/user-attachments/assets/5b0a43bb-29ef-43a6-ae32-6c5a0b6cb6a4" />
+
+### 2.3.1 Transient Analysis 
+
+
+
+
 
   
 
