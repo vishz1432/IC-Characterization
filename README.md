@@ -127,7 +127,112 @@ Now we will share instructions for installing WSL2 on Winodws 10/11 and install 
 - Open PowerShell or Windows Command Prompt in ADMINISTRATOR mode by right-clicking and selecting "Run as administrator".
 - In the PowerShell type ```bash wsl --list --online ```.
   - This will list all the available distributions online.
-- 
+- To install a particular distribution (Distro) say Ubuntu-24.04 (The name has to be exactly as printed in the above command):
+   - ```bash wsl --install -d Ubuntu-24.04 ```
+- It's important to update the WSL now by typing the following in the Powershell:
+   - wsl --update.
+- And shut it down:```bash wsl --shutdown```.Note: it will automatically start when the WSL distro selected from the Windows menu.
+
+## Launching Ubuntu 24.04.
+
+- ```bash Press Windows Key → select Ubuntu 24.04.```
+- Update the system
+  ```bash sudo apt update && sudo apt upgrade -y ```
+- Clone the Github Repository
+```bash
+ cd ~
+git clone https://github.com/IC Characterization.
+```
+- Copy & make install scripts executable
+```bash
+cp ~/IC Characterization/install*.sh .
+ chmod +x install*.sh
+```
+- Install dependencies & EDA tools
+   ```bash
+   ./install-libs.sh
+   ./install-eda.sh
+   ```
+- Add EDA environment variables
+  ```bash
+   cat ~/IC Characterization/bashrc-eda >> ~/.bashrc
+  source ~/.bashrc
+  ```
+- Setup Xschem initialization
+   ```bash
+   cp ~/share/xschemrc ~/.xschem/xschemrc
+   ```
+- Then type this command:
+   ```bash
+   tree -L 2
+   ```
+
+
+# 2. Linear Elements
+
+## 2.1 Resistors
+- A resistor is a passive electrical component that resists the flow of electric current, producing a voltage drop across its terminals according to Ohm's Law: ```bash V = I * R ```.
+- The resistance R of a material depends on its physical properties and geometry, given by the formula: ```bash R = ρL / A```.
+- In the Skywater SKY130 PDK, multiple resistor types are available for analog and digital IC design, offering different resistance values, temperature characteristics.
+
+### Types of Resistors available :
+- ``` bash sky130_fd_pr__res_high_po.model ```  has base models with 0.35u, 0.69u, 1.41u, 2.85u, 5.73u as bin width (fixed) with changable lengths.
+- ``` bash sky130_fd_pr__res_xhigh_po.model``` also has base models with 0.35u, 0.69u, 1.41u, 2.85u, 5.73u as bin width (fixed) with changable lengths.
+- ``` bash sky130_fd_pr__res_generic_nd.model ``` is a Generic N-diff type resister.
+- ``` bash sky130_fd_pr__res_generic_pd.model``` is a Generic P-diff type resister.
+
+### Ngspice File:
+```bash
+Title: Resistor Simulation
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+.temp 25
+
+Vin     in      0       DC 1.8
+Vm      in      1       0V
+X1      1       0       vdd   sky130_fd_pr__res_high_po_0p35 L=3.5
+vsup    vdd     gnd     DC 1.8
+
+.op
+
+.control
+run
+print v(in)
+print abs(i(Vm))
+let RES = v(in)/abs(i(Vm))
+print RES
+.endc
+
+.end
+```
+
+### Output:
+<img width="467" height="268" alt="image" src="https://github.com/user-attachments/assets/520694b6-9476-46ce-acd7-d6cb79baa5f0" />
+
+## 2.2 Capacitors
+
+- A capacitor is a passive electrical component that stores energy in the form of an electric field, defined by the relation: ```bash Q = C * V``` where ```C ```is the capacitance in Farads.
+- The capacitance C of a parallel-plate capacitor depends on its physical structure and the material between the plates, given by the formula: ```C = εA / d```.
+- In the Skywater SKY130 PDK, various capacitor types are available for use in analog, RF, and digital designs, each offering trade-offs in capacitance density, linearity, voltage rating, and temperature stability.
+
+
+### Types of Capacitor available:
+
+- ```sky130_fd_pr__cap_mim_m3_1.model``` is a Metal-Insulator-Metal (MIM) capacitor between Metal3 and Metal2, suitable for analog precision applications.
+- ```sky130_fd_pr__cap_mim_m3_2.model``` is another MIM capacitor variant with different area usage and parasitic trade-offs.
+- ```sky130_fd_pr__cap_mim_m2_1.model``` defines a MIM capacitor between Metal2 and Metal1 layers.
+- ```sky130_fd_pr__cap_var_lvt.model``` is a MOS varactor (voltage-dependent capacitor) built using LVT NMOS structure, useful for RF tuning.
+- ```sky130_fd_pr__cap_var_hvt.model``` is a similar varactor using HVT device for different threshold and leakage behavior.
+
+
+
+
+
+
+
+
+   
+
 
 
 
