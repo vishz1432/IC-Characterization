@@ -205,6 +205,39 @@ print RES
 
 .end
 ```
+### Resistance calculation (manual check)
+***R=VI***
+=
+1.8
+4.048903
+×
+10
+−
+4
+R=
+I
+V
+	​
+
+=
+4.048903×10
+−4
+1.8
+	​
+
+𝑅
+≈
+4445.6
+ 
+Ω
+  
+≈
+  
+4.45
+ 
+𝑘
+Ω
+R≈4445.6 Ω≈4.45kΩ
 
 ### Output:
 <img width="467" height="268" alt="image" src="https://github.com/user-attachments/assets/520694b6-9476-46ce-acd7-d6cb79baa5f0" />
@@ -223,6 +256,38 @@ print RES
 - ```sky130_fd_pr__cap_mim_m2_1.model``` defines a MIM capacitor between Metal2 and Metal1 layers.
 - ```sky130_fd_pr__cap_var_lvt.model``` is a MOS varactor (voltage-dependent capacitor) built using LVT NMOS structure, useful for RF tuning.
 - ```sky130_fd_pr__cap_var_hvt.model``` is a similar varactor using HVT device for different threshold and leakage behavior.
+
+
+```
+* Capacitor Simulation – SKY130
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+.temp 25
+
+* Apply DC voltage
+V1 in 0 DC 1.8
+
+* Zero-volt source to measure current
+Vm in node 0
+
+* MIM Capacitor
+XC1 node 0 sky130_fd_pr__cap_mim_m3_1 w=1 l=1
+
+.op
+
+.control
+run
+print v(in)
+print i(Vm)
+.endc
+
+.end
+```
+### output:
+<img width="477" height="347" alt="image" src="https://github.com/user-attachments/assets/c7cacbbb-1c4d-4194-b60d-9e0854913023" />
+
+
+  
 
 
 
