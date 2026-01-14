@@ -297,6 +297,128 @@ print i(Vm)
 <img width="425" height="366" alt="image" src="https://github.com/user-attachments/assets/5b0a43bb-29ef-43a6-ae32-6c5a0b6cb6a4" />
 
 ### 2.3.1 Transient Analysis 
+```
+Title: RC Ckt Simulation using SKY130 model
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+.temp 25
+
+Vin     in      0       PULSE(0 1.8 0 0 0 100p 200p)
+XR1     in      out     0       sky130_fd_pr__res_high_po_0p35 l=3.5
+XC1     out     0       sky130_fd_pr__cap_mim_m3_1 w=1 l=1
+
+.tran 1p 300p
+
+.control
+run
+plot v(in) v(out)
+.endc
+
+* Measure Time delays
+.meas tran rise        TRIG V(out) VAL=0.18 RISE=1 TARG V(out) VAL=1.62 RISE=1
+.meas tran fall        TRIG V(out) VAL=1.62 FALL=1 TARG V(out) VAL=0.18 FALL=1
+.meas tran rise_delay  TRIG V(in)  VAL=0.9  RISE=1 TARG V(out) VAL=0.9  RISE=1
+.meas tran fall_delay  TRIG V(in)  VAL=0.9  FALL=1 TARG V(out) VAL=0.9  FALL=1
+
+* Measure Max Voltage
+.meas tran VMAX MAX V(out)
+
+.end
+```
+### Output:
+<img width="635" height="465" alt="image" src="https://github.com/user-attachments/assets/46dbc60d-d1d2-4aaa-aae2-42e22e418ca4" />
+<img width="702" height="537" alt="image" src="https://github.com/user-attachments/assets/d3cee4ad-6c01-458a-bf09-7e7a305753ad" />
+
+### 2.3.2 AC Analysis 
+
+### Ngspice File:
+```
+* RC circuit AC analysis
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+.temp 25
+
+V1      in      0       AC 1
+XR1     in      out     0       sky130_fd_pr__res_high_po_0p35 l=3.5
+XC1     out     0       sky130_fd_pr__cap_mim_m3_1 w=1 l=1
+
+* AC Simulation
+.ac dec 10 1 15g
+
+.control
+run
+.meas ac f3db WHEN VDB(out) = -3
+plot vdb(out)
+.endc
+
+.end
+```
+### Output:
+<img width="1862" height="668" alt="image" src="https://github.com/user-attachments/assets/f7758806-e918-4630-bcc4-925f201aa1c9" />
+
+### Calculation of Cutoff Frequency (Hz)
+
+| Temperature | HH (GHz) | TT (GHz) | LL (GHz) |
+|-------------|----------|----------|----------|
+| -40 °C | 7.32 | 10.05 | 16.91 |
+| 25 °C  | 7.39 | 10.57 | 16.66 |
+| 125 °C | 7.37 | 10.37 | 15.99 |
+
+
+## 2.4 CR Circuits
+
+- A Cr circuit is essentially the same as an RC circuit, but with the capacitor (C) placed before the resistor (R) in the signal path. While electrically the time constant remains the same, the circuit response differs, especially in transient analysis. The fundamental time constant is defined as:
+```τ = R * C```, where ```τ ```(tau) represents the time constant in seconds, indicating how quickly the circuit charges or discharges.
+
+- In the Skywater SKY130 PDK, CR circuits are implemented using integrated capacitors (e.g.,``` sky130_fd_pr__cap_mim_m3_1```) and resistors (e.g.,``` sky130_fd_pr__res_high_po```). These configurations are often used in differentiator circuits, pulse shaping, and AC coupling applications in analog and RF systems.
+
+
+<img width="381" height="273" alt="image" src="https://github.com/user-attachments/assets/b315ef11-7f38-450d-b35d-f9570fbfa7b4" />
+
+### Ngspice file:
+```
+* Title: CR Ckt Simulation using SKY130 model
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+.temp 25
+
+Vin     in      0       PULSE(0 1.8 0 0 0 100p 200p)
+XC1     in      out     sky130_fd_pr__cap_mim_m3_1 w=1 l=1
+XR1     out     0       0       sky130_fd_pr__res_high_po_0p35 l=3.5
+
+.tran 1p 300p
+
+.control
+run
+plot v(in) v(out)
+.endc
+
+* Measure Time delays
+.meas tran rise        TRIG V(out) VAL=0.14 RISE=1 TARG V(out) VAL=1.29 RISE=1
+.meas tran fall        TRIG V(out) VAL=1.29 FALL=1 TARG V(out) VAL=0.14 FALL=1
+.meas tran rise_delay  TRIG V(in)  VAL=0.7  RISE=1 TARG V(out) VAL=0.7  RISE=1
+.meas tran fall_delay  TRIG V(in)  VAL=0.7  FALL=1 TARG V(out) VAL=0.7  FALL=1
+
+* Measure Max Voltage
+.meas tran VMAX MAX V(out)
+
+.end
+```
+### Output:
+
+<img width="556" height="367" alt="image" src="https://github.com/user-attachments/assets/115977b0-3138-4a59-9b3e-97e9542e7bc4" />
+
+<img width="602" height="446" alt="image" src="https://github.com/user-attachments/assets/a4c0b145-fbb4-434b-b0b8-daeeda7fdbb8" />
+
+
+
+
+
+
+
+
+
+
+
 
 
 
