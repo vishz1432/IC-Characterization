@@ -374,7 +374,7 @@ plot vdb(out)
 
 <img width="381" height="273" alt="image" src="https://github.com/user-attachments/assets/b315ef11-7f38-450d-b35d-f9570fbfa7b4" />
 
-### Ngspice file:
+### 2.4.1 Transient Analysis:
 ```
 * Title: CR Ckt Simulation using SKY130 model
 
@@ -408,6 +408,95 @@ plot v(in) v(out)
 <img width="556" height="367" alt="image" src="https://github.com/user-attachments/assets/115977b0-3138-4a59-9b3e-97e9542e7bc4" />
 
 <img width="602" height="446" alt="image" src="https://github.com/user-attachments/assets/a4c0b145-fbb4-434b-b0b8-daeeda7fdbb8" />
+
+
+### 2.4.2 AC Analysis 
+
+```
+* CR Charging Circuit with Pulse Input
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+.temp 25
+
+V1       in     0           AC 1
+XC1      in     out         sky130_fd_pr__cap_mim_m3_1  w=1 l=1
+XR1      out    0       0   sky130_fd_pr__res_high_po_0p35  l=3.5
+
+.ac dec 10 1meg 10e13
+
+.control
+run
+plot vdb(out)
+.endc
+
+.end
+```
+### Output:
+<img width="1899" height="1003" alt="Screenshot 2026-01-15 193340" src="https://github.com/user-attachments/assets/5021500a-3b01-4abf-84e0-2d11033411ef" />
+
+
+# 3. MOSFET Circuits
+- A MOSFET (Metal-Oxide-Semiconductor Field-Effect Transistor) is a three-terminal active device used for switching and amplification. Its current is controlled by the voltage applied to the gate terminal.
+- The MOSFET operates in three regions: cutoff, linear, and saturation, depending on gate-source (VGS) and drain-source (VDS) voltages.
+- In the Skywater SKY130 PDK, MOSFETs like ```sky130_fd_pr__nfet_01v8``` (NMOS) and ```sky130_fd_pr__pfet_01v8``` (PMOS) are commonly used.
+   These are essential in digital logic, analog amplifiers, and switching applications.
+
+
+## 3.1 NMOS Analysis
+- A NMOS (N-type MOSFET) is a majority-carrier device where current flows between the drain and source when a positive voltage is applied to the gate. It acts as a voltage-controlled current source.
+- The drain current (ID) depends on the gate-to-source voltage (VGS), and its behavior changes across three regions:
+    - Cutoff: VGS < Vth, ID ≈ 0
+    - Linear: VGS > Vth and VDS < VGS − Vth
+    - Saturation: VDS ≥ VGS − Vth
+
+- The ID-VGS curve shows how the drain current increases with gate voltage (at constant VDS), helping identify the threshold voltage (Vth), where the transistor starts conducting. This curve is essential for characterizing the device and is often used in DC sweep simulations.
+- In the Skywater SKY130 PDK, NMOS devices like sky130_fd_pr__nfet_01v8 are used in logic gates, analog blocks, and current sources.
+
+
+```
+* NMOS analysis
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+.include "/home/vishalvlsi/share/pdk/sky130A/libs.ref/sky130_fd_pr/spice"
+.temp 25
+
+Vd   1   0   DC 1.8
+Vid  1   d   DC 0
+Vg   g   0   DC 0
+
+* NMOS: D G S B
+X1 d g 0 0 sky130_fd_pr__nfet_01v8 w=0.42 l=1
+
+.control
+run
+save all
+
+* Uncomment these 2 lines for ID vs VGS Curve
+*dc vg 0 1.8 0.001 vd 0 1.8 0.1
+*plot I(vid) xlabel "VGS (V)" ylabel "ID (A)" title "ID vs VGS"
+
+* Uncomment these 2 lines for ID vs VDS Curve
+*dc vd 0 1.8 0.001 vg 0 1.8 0.1
+*plot I(vid) xlabel "VDS (V)" ylabel "ID (A)" title "ID vs VDS"
+.endc
+
+.end
+```
+### Output(ID-VGS):
+<img width="601" height="434" alt="Screenshot 2026-01-15 205213" src="https://github.com/user-attachments/assets/0e08a054-56c0-4263-9470-c01d2f395ea1" />
+
+
+### (ID-VDS):
+<img width="606" height="438" alt="image" src="https://github.com/user-attachments/assets/9459f17a-2cba-495f-ade9-b42f97862c9a" />
+
+
+
+
+
+
+
+
+
+
+
 
 
 
