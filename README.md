@@ -848,7 +848,7 @@ meas tran vmin MIN v(out)
 
 ### 3.1  Single Stage Amplifier 
 - Common Source configuration.
-  - Resistive Load .
+  - Res++++++++++++++++++++istive Load .
   - Mosfet Load or Diode Load .
   - Mosfet in Saturation.
   - Source degenration.
@@ -864,6 +864,12 @@ meas tran vmin MIN v(out)
    - Input resistance.
    - Input swing.
    - Output swing.
+
+### 3.1.1 Common Source Amplifier with Resistive Load.
+![WhatsApp Image 2026-01-21 at 8 53 04 PM](https://github.com/user-attachments/assets/3fa01a7a-d4c6-47df-aac1-a7144b57d520)
+
+
+
 
 
 
