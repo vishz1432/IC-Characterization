@@ -843,11 +843,28 @@ meas tran vmin MIN v(out)
 - vmax = 1.801976e+00 at= 1.213500e-07
 - vmin = -1.311942e-04 at= 7.015000e-08
 
-# Conclusion 
+# 3. Amplifier 
 
- In this project, the CMOS inverter was analyzed and characterized to understand its DC and transient performance. Key parameters such as the Voltage Transfer Characteristics (VTC), noise margins, propagation delay, rise and fall times, and power dissipation were evaluated through simulation. The results demonstrate the inverter’s sharp switching behavior, high noise immunity, and low static power consumption, which are fundamental advantages of CMOS technology.
 
-  The characterization of the inverter provides critical insight into the impact of transistor sizing, load capacitance, and supply voltage on circuit performance. Since the CMOS inverter serves as the basic building block of digital integrated circuits, a thorough understanding of its behavior is essential for the design and optimization of more complex logic gates and digital systems. This study establishes a strong foundation for advanced CMOS circuit design and performance analysis.
+### 3.1 Single Stage Amplifier 
+- Common Source configuration.
+  - Resistive Load .
+  - Mosfet Load or Diode Load .
+  - Mosfet in Saturation.
+  - Source degenration.
+- Common Gate Configuration (Current Gain).
+- Common Drain Configuration.(source follower Config).(Buffer).
+- Cascode Configuration Amplifier.
+
+### For Checking We will Do 
+1. DC Analysis.
+2. AC Analysis.
+   - Gain
+   - Output resistance.
+   - Input resistance.
+   - Input swing.
+   - Output swing.
+
 
 
 
