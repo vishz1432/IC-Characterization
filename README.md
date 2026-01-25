@@ -868,11 +868,62 @@ meas tran vmin MIN v(out)
 ### 3.1.1 Common Source Amplifier with Resistive Load.
 ![WhatsApp Image 2026-01-21 at 8 53 04 PM](https://github.com/user-attachments/assets/3fa01a7a-d4c6-47df-aac1-a7144b57d520)
 
+## Specification For Designing:
 
+| Parameter | Description | Value |
+|---------|------------|-------|
+| VDD | Supply Voltage | 1.8 V |
+| Technology Node | Process | 130 nm |
+| Vbias | Bias Voltage | 1.8 V |
+| VDS | Drain–Source Voltage | 0.9 V |
+| VGS | Gate–Source Voltage | 1.0 V |
+| Vt | Threshold Voltage | 0.55 V |
+| W | Transistor Width | 10 µm |
+| L | Transistor Length | 2 µm |
+| CL | Load Capacitance | 10 pF |
+| RD | Drain Resistance | 10 kΩ |
+| KP (μnCox) | Transconductance Parameter | 220 µA/V² |
+| λ | Channel Length Modulation | 0.05 V⁻¹ |
+| gm | Transconductance | Extracted from AC analysis |
+| ro | Output Resistance | Extracted from AC analysis |
+| Av | Voltage Gain | Extracted from AC analysis |
+| BW | Bandwidth | >= 2 MHz |
+| UGB | Unity Gain Bandwidth | >= 10 MHz |
 
+### Spice Code
 
+```
 
+.title CS Amplifier with NMOS Driver and Resistive Load
 
+.lib /home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.global gnd
+.temp 27
+
+XM1 out in gnd gnd sky130_fd_pr__nfet_01v8 w=10 l=2 m=2
+RD  avdd out 7.7K
+CL  out gnd 10p
+
+*vgs in gnd dc 0.9 ac -1
+vsup avdd gnd dc 1.8
+Vin  in gnd dc 0.9 ac -1 sin(0 1m 1000)
+
+.op
+.dc vgs 0 1.8 0.01
+.ac dec 20 1 1G
+.tran 20u 1n
+
+.control
+run
+set color0=white
+print v(out)
+plot v(in) v(out)
+plot db20(v(out)/v(in))
+plot ph(v(out)/v(in))
+.end
+.endc
+```
 
 
 
