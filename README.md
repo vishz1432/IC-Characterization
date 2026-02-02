@@ -938,7 +938,7 @@ plot ph(v(out)/v(in))
 - Rout : 1/gm2
 
 
-### (C) Design of CS Amplifier With Current Source Load 
+### 3.1.3 (C) Design of CS Amplifier With Current Source Load 
 
 <img width="551" height="405" alt="image" src="https://github.com/user-attachments/assets/4466fa49-a8bb-4a79-bfdd-f58f2ef540e8" />
 
@@ -1126,7 +1126,7 @@ plot v(out)
 <img width="931" height="692" alt="image" src="https://github.com/user-attachments/assets/4de0f94b-75eb-4356-a381-b598b71972ed" />
 
 
-### (D) CS Amplifier With Source Degenrated Resistor 
+### 3.1.4 (D) CS Amplifier With Source Degenrated Resistor 
 
 <img width="737" height="576" alt="image" src="https://github.com/user-attachments/assets/b0a32fbd-b404-4a63-9e28-3f61de3ccb02" />
 
@@ -1297,6 +1297,180 @@ plot deriv(v(out))
 <img width="698" height="532" alt="image" src="https://github.com/user-attachments/assets/53ec86f8-638a-4f23-a6f5-65106557e163" />
 
 <img width="698" height="535" alt="image" src="https://github.com/user-attachments/assets/379808ab-41f0-4b01-a3fb-ad2ff851dbfa" />
+
+
+## 3.2 Common Drain or (Source Follower)
+
+<img width="565" height="388" alt="Screenshot 2026-02-02 203032" src="https://github.com/user-attachments/assets/dd3c9037-f65c-4988-b7b1-3ef6f4742477" />
+
+- Rout : 1/gm
+- Rin : infinite
+- Gain : gm(Rs // ro) / 1 + gm(Rs // ro)
+
+### DC Analysis :
+```
+******************* Common Drain Amplifier with resistive load *******************
+******************* DC ANALYSIS *************************************************
+
+
+
+.title Common Drain Amplifier with Resistive Load
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd vdd
+.temp 27
+
+xmn1 Dn1 in out gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+Rs  out gnd 5k
+*RL  Out Gnd 8
+Vcm vdd Dn1 dc 0
+Cl  out gnd 10p
+
+vsup vdd gnd dc 1.8
+Vin  in gnd dc 1.5 ac 1 sin(1.438 1m 100k)
+
+*.dc Vbn1 0 1.8 0.01
+.dc Vin 0 1.8 0.01
+
+.control
+run
+set color0=white
+plot v(out)
+plot i(Vcm)
+plot deriv(v(out))
+.endc
+
+.end
+```
+<img width="601" height="542" alt="image" src="https://github.com/user-attachments/assets/782e4ed4-1a76-4672-87a5-f349936796e8" />
+
+<img width="601" height="543" alt="image" src="https://github.com/user-attachments/assets/598a53b2-a5e9-4a38-bee7-d5a657ec1543" />
+
+<img width="603" height="543" alt="image" src="https://github.com/user-attachments/assets/7f7ecaeb-b843-4081-888c-542a04c4574a" />
+
+### AC analysis :
+```
+******************* Common Drain Amplifier with resistive load *******************
+******************* AC ANALYSIS *************************************************
+
+
+
+.title Common Drain Amplifier with Resistive Load
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd vdd
+.temp 27
+
+xmn1 Dn1 in out gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+Rs  out gnd 5k
+*RL Out Gnd 8
+Vcm vdd Dn1 dc 0
+Cl  out gnd 10p
+
+vsup vdd gnd dc 1.8
+Vin  in gnd dc 1.5 ac 1 sin(1.438 1m 100k)
+
+*.dc Vbn1 0 1.8 0.01
+.ac dec 10 1 10G
+
+.control
+run
+set color0=white
+plot v(out)
+*plot vdb(out)
+plot ph(out)*(180/pi)
+.endc
+
+.end
+```
+<img width="706" height="542" alt="image" src="https://github.com/user-attachments/assets/915dd5a4-c210-464d-b3dd-e7530411876c" />
+
+<img width="706" height="541" alt="image" src="https://github.com/user-attachments/assets/29744b4e-c171-469e-9aca-4ec68f61c674" />
+
+### Transient Analysis:
+```
+****************** Common Drain Amplifier with resistive load *******************
+******************* AC ANALYSIS *************************************************
+
+.title Common Drain Amplifier with Resistive Load
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd vdd
+.temp 27
+
+xmn1 Dn1 in out gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+Rs  out gnd 5k
+*RL Out Gnd 8
+Vcm vdd Dn1 dc 0
+Cl  out gnd 10p
+
+vsup vdd gnd dc 1.8
+Vin  in gnd dc 1.5 ac 1 sin(1.438 300m 100k)
+
+.tran 10p 100u
+
+.control
+run
+set color0=white
+plot v(in) v(out)
+.endc
+
+.end
+```
+<img width="9905" height="681" alt="image" src="https://github.com/user-attachments/assets/f033a2ba-3a7c-4fbf-bdfc-999f514c12db" />
+
+## Common Drain Using Mosfet Load 
+```
+******************* Common Drain Amplifier with MOSFET load *******************
+******************* DC ANALYSIS **********************************************
+
+.title Common Drain Amplifier with MOSFET Load
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd vdd
+.temp 27
+
+xmn1 Dn1 in out gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+xmn2 out Gn2 gnd gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+*RL out gnd 10
+Vcm vdd Dn1 dc 0
+Cl  out gnd 10p
+
+Vsup  vdd gnd dc 1.8
+Vbias Gn2 gnd dc 0.85
+Vin   in  gnd dc 1.5 ac 1 sin(1.8 1m 100k)
+
+*.dc Vbn1 0 1.8 0.01
+.dc Vin 0 1.8 0.01
+
+.control
+run
+set color0=white
+plot v(out)
+plot i(Vcm)
+plot deriv(v(out))
+.endc
+
+.end
+```
+<img width="699" height="537" alt="image" src="https://github.com/user-attachments/assets/b0bdf65d-61de-4a3b-99d4-3284b8a7d6e1" />
+
+<img width="701" height="537" alt="image" src="https://github.com/user-attachments/assets/e38d14ce-a12b-43e6-9365-74a1b4b1522b" />
+
+<img width="699" height="537" alt="image" src="https://github.com/user-attachments/assets/54030d3c-b491-4730-a252-161bb70253c3" />
+
+## Common Gate Amplifier 
+
+
+
+
+
+
+
 
 
 
