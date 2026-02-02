@@ -1517,6 +1517,87 @@ plot v(Sn1) v(out)
 ```
 <img width="702" height="541" alt="image" src="https://github.com/user-attachments/assets/609f3a15-82b0-4159-94ed-4780b06740d5" />
 
+<img width="702" height="547" alt="image" src="https://github.com/user-attachments/assets/6a7f9e90-461f-4302-ba98-da3a3b4b2d52" />
+
+### AC Analysis :
+
+```
+******************* Common Gate Amplifier with N-Channel MOSFET and Resistive Load *******************
+
+.title CG Amplifier with NMOS Driver and Resistive Load
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd
+.temp 27
+
+xmn1 out Gn1 Sn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+Rd  Rt1 out 8k
+*Rs Rt2 gnd 2k
+Cl  out gnd 10p
+Vcm vdd Rt1 dc 0
+
+vsup vdd gnd dc 1.8
+Vgs  Gn1 gnd dc 1.08104
+Vss  Sn1 gnd dc 0.2 ac 1 sin(0.2 10m 1k)
+
+*.dc Vgs 0 1.8 0.01
+.ac dec 10 1 1G
+*.tran 20u 1n
+
+.control
+run
+set color0=white
+plot i(Vss) i(Vcm)
+plot v(Sn1) v(Rt1) v(out)
+plot db(out) db(Sn1)
+plot ph(out)*(180/pi)
+.endc
+
+.end
+```
+<img width="698" height="536" alt="image" src="https://github.com/user-attachments/assets/efdf262f-f79b-4478-bf47-7a51fde02d7c" />
+
+<img width="702" height="538" alt="image" src="https://github.com/user-attachments/assets/7812bd9e-2a6f-4c99-b161-f4b264faf328" />
+
+<img width="700" height="532" alt="image" src="https://github.com/user-attachments/assets/b223fd81-091a-45b1-b390-f7f2d8da50b9" />
+
+<img width="702" height="542" alt="image" src="https://github.com/user-attachments/assets/db1c3586-8f48-472a-ae15-f0167b8bb8f4" />
+
+### Transient Analysis 
+```
+******************* Common Gate Amplifier – Transient Analysis *******************
+
+.title CG Amplifier with NMOS Driver and Resistive Load
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd
+.temp 27
+
+xmn1 out Gn1 Sn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+Rd  Rt1 out 8k
+Cl  out gnd 10p
+Vcm vdd Rt1 dc 0
+
+vsup vdd gnd dc 1.8
+Vgs  Gn1 gnd dc 1.0813
+Vss  Sn1 gnd sin(0.2 10m 1k)
+
+.tran 1u 10m
+
+.control
+run
+set color0=white
+plot v(Sn1) v(out)
+.endc
+
+.end
+```
+<img width="1841" height="1015" alt="image" src="https://github.com/user-attachments/assets/7ada3da2-231e-4e47-9ab9-dde8c31ced3a" />
+
+
+
 
 
 
