@@ -1463,7 +1463,7 @@ plot deriv(v(out))
 
 <img width="699" height="537" alt="image" src="https://github.com/user-attachments/assets/54030d3c-b491-4730-a252-161bb70253c3" />
 
-## Common Gate Amplifier 
+## 3.3 Common Gate Amplifier 
 <img width="572" height="575" alt="image" src="https://github.com/user-attachments/assets/69fa5f31-9eb9-45bc-82b3-634bd335e66a" />
 
 
@@ -1595,6 +1595,18 @@ plot v(Sn1) v(out)
 .end
 ```
 <img width="1841" height="1015" alt="image" src="https://github.com/user-attachments/assets/7ada3da2-231e-4e47-9ab9-dde8c31ced3a" />
+
+
+
+
+
+
+
+
+## 3.4 Cascode Configuration amplifier (IN Single Stage)
+
+<img width="563" height="498" alt="image" src="https://github.com/user-attachments/assets/ec4a1711-29d8-4a60-a4c2-689b4be67743" />
+
 
 
 
