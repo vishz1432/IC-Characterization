@@ -941,6 +941,8 @@ plot ph(v(out)/v(in))
 ### (C) Design of CS Amplifier With Current Source Load 
 
 <img width="551" height="405" alt="image" src="https://github.com/user-attachments/assets/4466fa49-a8bb-4a79-bfdd-f58f2ef540e8" />
+
+
 - Gain : -gm (ro1 // ro2)
 - Rout : (ro1 // ro2) which is approx 100kohm
 - UGB : gm/2picl  , which is less than 10 mhz.
@@ -1127,6 +1129,7 @@ plot v(out)
 ### (D) CS Amplifier With Source Degenrated Resistor 
 
 <img width="737" height="576" alt="image" src="https://github.com/user-attachments/assets/b0a32fbd-b404-4a63-9e28-3f61de3ccb02" />
+
 
 - Gm : -gm roRd / ro + Rs + gmroRs + Rd
 - Rout : ro // Rd
