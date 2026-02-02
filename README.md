@@ -846,7 +846,7 @@ meas tran vmin MIN v(out)
 # 3. Amplifier 
 
 
-### 3.1  Single Stage Amplifier 
+## 3.1  Single Stage Amplifier 
 - Common Source configuration.
   - Resistive Load .
   - Mosfet Load or Diode Load .
@@ -865,7 +865,7 @@ meas tran vmin MIN v(out)
    - Input swing.
    - Output swing.
 
-### 3.1.1 Common Source Amplifier with Resistive Load.
+### 3.1.1(A) Common Source Amplifier with Resistive Load.
 ![WhatsApp Image 2026-01-21 at 8 53 04 PM](https://github.com/user-attachments/assets/3fa01a7a-d4c6-47df-aac1-a7144b57d520)
 
 ## Specification For Designing:
@@ -924,6 +924,394 @@ plot ph(v(out)/v(in))
 .end
 .endc
 ```
+
+### 3.1.2(B) Common Source Amplifier Using Diode Load
+<img width="606" height="468" alt="image" src="https://github.com/user-attachments/assets/b753c156-d9a6-414e-9f64-b54845768800" />
+
+
+***Small Signal Analysis***
+
+<img width="578" height="305" alt="Screenshot 2026-02-02 115616" src="https://github.com/user-attachments/assets/ce3b3df9-e5ca-4977-a1c5-2961b7a3134a" />
+
+- Gain : -gm1 (ron // 1/gm2)
+- Rin : infinity
+- Rout : 1/gm2
+
+
+### (C) Design of CS Amplifier With Current Source Load 
+
+<img width="551" height="405" alt="image" src="https://github.com/user-attachments/assets/4466fa49-a8bb-4a79-bfdd-f58f2ef540e8" />
+- Gain : -gm (ro1 // ro2)
+- Rout : (ro1 // ro2) which is approx 100kohm
+- UGB : gm/2picl  , which is less than 10 mhz.
+
+Using Some Specification We will design the Circuit.\
+
+### DC Analysis :
+
+```
+**************** Common Source Amplifier with N-Channel MOSFET and Current Source Load ****************
+**************** DC ANALYSIS ****************
+
+.title CS Amplifier with NMOS Driver and PMOS Current Source Load
+
+.lib /home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.global gnd vdd
+.temp 27
+
+* NMOS driver
+xm1 out in gnd gnd sky130_fd_pr__nfet_01v8 w=7 l=2 m=2
+
+* Current source NMOS bias
+xm2 Dp2 Gn2 gnd gnd sky130_fd_pr__nfet_01v8 w=7 l=2 m=2
+
+* PMOS load (current mirror)
+xmp1 Dp1 Dp2 vdd vdd sky130_fd_pr__pfet_01v8_lvt w=7 l=2 m=6
+xmp2 Dp2 Dp2 vdd vdd sky130_fd_pr__pfet_01v8_lvt w=7 l=2 m=6
+
+* Bias voltages
+Vcm1 Dp1 out dc 0
+Vcm2 Dp2 Dn2 dc 0
+
+* Load capacitance
+Cl out gnd 10p
+
+* Supply
+vsup vdd gnd dc 1.8
+
+* Input
+Vin in gnd dc 0.9 ac 1 sin(0.9 1m 100k)
+
+* Bias for current source
+Vbn1 Gn2 gnd dc 0.9
+
+* DC sweep
+
+*.dc Vbn1 0 1.8 0.01
+.dc Vin 0 1.8 0.01
+
+.control
+run
+set color0=white
+plot v(out) v(Dp2)
+plot i(Vcm1) i(Vcm2)
+print abs(v(Dp2))
+.endc
+
+.end
+```
+<img width="502" height="342" alt="image" src="https://github.com/user-attachments/assets/aaaa6685-42ea-415f-807a-c34ff7d98994" />
+
+<img width="502" height="342" alt="image" src="https://github.com/user-attachments/assets/41268990-7d2f-4292-b472-f07b69db4a25" />
+
+
+### AC Analysis:
+
+```
+**************** Common Source Amplifier with N-Channel MOSFET and Current Source Load ****************
+**************** AC ANALYSIS ****************
+
+.title CS Amplifier with NMOS Driver and PMOS Current Source Load
+
+.lib /home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.global gnd vdd
+.temp 27
+
+* NMOS driver
+xm1 out in gnd gnd sky130_fd_pr__nfet_01v8 w=7 l=2 m=2
+
+* NMOS current source bias
+xm2 Dn2 Gn2 gnd gnd sky130_fd_pr__nfet_01v8 w=7 l=2 m=2
+
+* PMOS current mirror load
+xmp1 Dp1 Dp2 vdd vdd sky130_fd_pr__pfet_01v8_lvt w=7 l=2 m=6
+xmp2 Dp2 Dp2 vdd vdd sky130_fd_pr__pfet_01v8_lvt w=7 l=2 m=6
+
+* Bias voltages
+Vcm1 Dp1 out dc 0
+Vcm2 Dp2 Dn2 dc 0
+
+* Load capacitance
+Cl out gnd 10p
+
+* Supply voltage
+vsup vdd gnd dc 1.8
+
+* Input source (AC small signal = 1)
+Vin in gnd dc 0.9 ac 1 sin(0.9 1m 100k)
+
+* Bias for current source
+Vbn1 Gn2 gnd dc 0.9
+
+* -------- AC SWEEP --------
+.ac dec 20 1 1G
+
+.control
+run
+set color0=white
+
+plot v(in) abs(v(out)) xlabel 'Frequency' ylabel 'Gain(mag)'
+plot abs(v(out))/v(in) xlabel 'Frequency' ylabel 'Gain(mag)'
+plot vdb(out) xlabel 'Frequency' ylabel 'Gain(dB)'
+plot ph(out)*(180/pi) xlabel 'Frequency' ylabel 'Phase(Deg)'
+
+print vdb(out)
+
+.endc
+
+.end
+```
+<img width="707" height="543" alt="image" src="https://github.com/user-attachments/assets/71fac3f4-2e87-4a00-bb62-6da0b7cab3a7" />
+<img width="702" height="540" alt="image" src="https://github.com/user-attachments/assets/f4457234-bf4d-482f-a5b7-458cddb57a23" />
+<img width="702" height="538" alt="image" src="https://github.com/user-attachments/assets/a36fbbe9-e25d-40cc-8714-48db54ff2c6c" />
+<img width="703" height="533" alt="image" src="https://github.com/user-attachments/assets/0029b27e-e0d7-42e7-99d1-d8625ae55f4b" />
+
+### Transient Analysis :
+```
+**************** Common Source Amplifier with N-Channel MOSFET and Current Source Load ****************
+**************** TRANSIENT ANALYSIS **********************
+
+
+.title CS Amplifier with NMOS Driver and PMOS Current Source Load
+
+.lib /home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.global gnd vdd
+.temp 27
+
+* NMOS driver
+xm1 out in gnd gnd sky130_fd_pr__nfet_01v8 w=7 l=2 m=2
+
+* NMOS current source bias
+xm2 Dn2 Gn2 gnd gnd sky130_fd_pr__nfet_01v8 w=7 l=2 m=2
+
+* PMOS current mirror load
+xmp1 Dp1 Dp2 vdd vdd sky130_fd_pr__pfet_01v8_lvt w=7 l=2 m=6
+xmp2 Dp2 Dp2 vdd vdd sky130_fd_pr__pfet_01v8_lvt w=7 l=2 m=6
+
+* Bias voltages
+Vcm1 Dp1 out dc 0
+Vcm2 Dp2 Dn2 dc 0
+
+* Load capacitance
+Cl out gnd 10p
+
+* Supply voltage
+vsup vdd gnd dc 1.8
+
+* Input signal
+Vin in gnd dc 0.9 ac 1 sin(0.9 1m 10k)
+
+* Bias for current source
+Vbn1 Gn2 gnd dc 0.9
+
+* -------- TRANSIENT ANALYSIS --------
+.tran 1n 1000u
+.control
+run
+set color0=white
+plot v(in)
+plot v(out)
+
+.endc
+
+.end
+```
+<img width="931" height="691" alt="image" src="https://github.com/user-attachments/assets/5de0bfa8-1025-41e3-a88b-088a1187f9a2" />
+
+<img width="931" height="692" alt="image" src="https://github.com/user-attachments/assets/4de0f94b-75eb-4356-a381-b598b71972ed" />
+
+
+### (D) CS Amplifier With Source Degenrated Resistor 
+
+<img width="737" height="576" alt="image" src="https://github.com/user-attachments/assets/b0a32fbd-b404-4a63-9e28-3f61de3ccb02" />
+
+- Gm : -gm roRd / ro + Rs + gmroRs + Rd
+- Rout : ro // Rd
+- UGB : 1/2pi RoutCL , which is 6.30 MHz
+- BW : 2.03 MHz
+
+### DC Analysis :
+
+```
+**************** Common Source Amplifier with Resistive Load and Source Degeneration Resistance ****************
+**************** DC ANALYSIS ****************
+
+.title Source Degenerated CS Amplifier with NMOS Driver and Resistive Load
+
+.lib /home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.global gnd vdd
+.temp 27
+
+* NMOS transistor
+xm1 out in Sn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+
+* Load and source resistances
+Rd vdd net1 8k
+Rs Sn1 gnd 0.8k
+
+* Voltage monitor (for current measurement)
+Vcm net1 out dc 0
+
+* Load capacitance
+Cl out gnd 10p
+
+* Supply voltage
+vsup vdd gnd dc 1.8
+
+* Input voltage
+Vin in gnd dc 0.85 ac 1 sin(0.9 1m 100k)
+
+* -------- DC SWEEP --------
+
+*.dc Vbn1 0 1.8 0.01
+.dc Vin 0 1.8 0.01
+
+.control
+run
+set color0=white
+
+plot v(out) v(Sn1)
+plot i(Vcm)
+plot deriv(v(out))
+.endc
+.end
+```
+<img width="698" height="535" alt="image" src="https://github.com/user-attachments/assets/7d151686-ef7f-461c-a84b-c9ed3ba89fdc" />
+
+<img width="702" height="540" alt="image" src="https://github.com/user-attachments/assets/8ea55c49-c768-4122-bb58-6a2fea1f06d7" />
+
+<img width="701" height="540" alt="image" src="https://github.com/user-attachments/assets/f879069c-38f7-410e-af16-3ebd8cabf748" />
+
+### AC Analysis :
+
+```
+**************** Common Source Amplifier with Resistive Load and Source Degeneration Resistance ****************
+**************** AC ANALYSIS *************
+
+
+.title Source Degenerated CS Amplifier with NMOS Driver and Resistive Load
+
+.lib /home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.global gnd vdd
+.temp 27
+
+* NMOS transistor
+xm1 out in Sn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+
+* Load and source resistances
+Rd vdd net1 8k
+Rs Sn1 gnd 0.8k
+
+* Voltage monitor
+Vcm net1 out dc 0
+
+* Load capacitance
+Cl out gnd 10p
+
+* Supply voltage
+vsup vdd gnd dc 1.8
+
+* Input voltage (AC small-signal = 1)
+Vin in gnd dc 0.85 ac 1 sin(0.9 1m 100k)
+
+* -------- AC SWEEP --------
+.ac dec 10 1 10meg
+
+.control
+run
+set color0=white
+
+plot abs(v(out))
+plot vdb(out)
+plot ph(out)*(180/pi)
+
+.endc
+
+.end
+```
+<img width="692" height="535" alt="image" src="https://github.com/user-attachments/assets/3c5c4750-fbd5-4d1b-9d14-dcb94b924dea" />
+
+<img width="705" height="540" alt="image" src="https://github.com/user-attachments/assets/c8218c06-b57e-43ce-9d97-9f19a5c9e4d2" />
+
+<img width="706" height="541" alt="image" src="https://github.com/user-attachments/assets/a32cdc42-7da5-4b5d-bf16-3ac0c34f32c1" />
+
+
+ON Using Extra 'RS' Value
+```
+**************** Common Source Amplifier with Resistive Load and Source Degeneration Resistance ****************
+**************** DC ANALYSIS ****************
+
+.title Source Degenerated CS Amplifier with NMOS Driver and Resistive Load
+
+.lib /home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.global gnd vdd
+.temp 27
+
+* NMOS transistor
+xm1 out in Sn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+
+* Load and source resistances
+Rd vdd net1 8k
+Rs Sn1 gnd 0.8k
+
+* Voltage monitor (for current)
+Vcm net1 out dc 0
+
+* Load capacitance
+Cl out gnd 10p
+
+* Supply voltage
+vsup vdd gnd dc 1.8
+
+* Input voltage
+Vin in gnd dc 0.85 ac 1 sin(0.9 1m 100k)
+
+* -------- DC SWEEP --------
+
+*.dc Vbn1 0 1.8 0.01
+.dc Vin 0 1.8 0.01 Rs 0 0.8k 0.2k
+
+.control
+run
+set color0=white
+
+plot v(out) v(Sn1)
+plot i(Vcm)
+plot deriv(v(out))
+
+.endc
+
+.end
+```
+<img width="698" height="536" alt="image" src="https://github.com/user-attachments/assets/925408d6-4bdd-4a63-915a-b42693068f3b" />
+
+<img width="698" height="532" alt="image" src="https://github.com/user-attachments/assets/53ec86f8-638a-4f23-a6f5-65106557e163" />
+
+<img width="698" height="535" alt="image" src="https://github.com/user-attachments/assets/379808ab-41f0-4b01-a3fb-ad2ff851dbfa" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
