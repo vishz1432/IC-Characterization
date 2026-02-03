@@ -1607,6 +1607,94 @@ plot v(Sn1) v(out)
 
 <img width="563" height="498" alt="image" src="https://github.com/user-attachments/assets/ec4a1711-29d8-4a60-a4c2-689b4be67743" />
 
+### Cascode Amplifier Gain Derivation
+
+$$
+Gain = - g_m R_{out}
+$$
+
+$$
+g_m = \frac{I_{sc}}{V_{in}}
+$$
+
+$$
+R_{out} = \text{Output Resistance}
+$$
+
+
+$$
+V_{out} = - i_{out} R_D
+$$
+
+$$
+i_{out} = - \frac{V_{out}}{R_D}
+$$
+
+$$
+i_{out} = g_m V_{in} + \frac{V_s}{r_{o1}}
+$$
+
+
+$$
+-\frac{V_{out}}{R_D} = g_m V_{in} + \frac{V_s}{r_{o1}}
+$$
+
+$$
+V_s = V_{out} - ( i_{out} + g_{m2} V_s ) r_{o2}
+$$
+
+$$
+V_s + g_{m2} r_{o2} V_s = V_{out} - i_{out} r_{o2}
+$$
+
+$$
+V_s ( 1 + g_{m2} r_{o2} ) = V_{out} - i_{out} r_{o2}
+$$
+
+$$
+V_s = \frac{V_{out} - i_{out} r_{o2}}{1 + g_{m2} r_{o2}}
+$$
+
+$$
+V_s = \frac{V_{out} + \frac{V_{out} r_{o2}}{R_D}}{1 + g_{m2} r_{o2}}
+$$
+
+
+$$
+V_s = \frac{V_{out} \left( 1 + \frac{r_{o2}}{R_D} \right)}{1 + g_{m2} r_{o2}}
+$$
+
+
+$$
+\frac{V_{out}}{V_{in}} = - g_{m1} R_D
+\left(
+\frac{r_{o1} + g_{m2} r_{o1} r_{o2}}
+{R_D + r_{o1} + r_{o2} + g_{m2} r_{o1} r_{o2}}
+\right)
+$$
+
+$$
+V_{out}
+\left[
+\frac{R_D + r_{o1} + r_{o2} + g_{m2} r_{o1} r_{o2}}
+{R_D ( r_{o1} + g_{m2} r_{o1} r_{o2} )}
+\right]
+= - g_{m1} V_{in}
+$$
+
+### Final Voltage Gain (Cascode Amplifier)
+
+$$
+A_v = \frac{V_{out}}{V_{in}}
+= - g_{m1} R_D
+\left(
+\frac{r_{o1} + g_{m2} r_{o1} r_{o2}}
+{R_D + r_{o1} + r_{o2} + g_{m2} r_{o1} r_{o2}}
+\right)
+$$
+
+
+
 
 
 
