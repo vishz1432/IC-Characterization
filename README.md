@@ -1693,6 +1693,21 @@ A_v = \frac{V_{out}}{V_{in}}
 \right)
 $$
 
+### Advantage of Cascode 
+1. Huge output impedance.
+2. Gain is High.
+3. Good PSRR (Power Supply rejection ratio).
+
+
+### Disadvantage
+1. No of transistor are more.
+2. Design is too Complex (Biasing Voltage).
+3. Swing (O/P) will be loss.
+
+
+
+
+
 
 
 
