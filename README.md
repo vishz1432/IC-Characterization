@@ -1834,6 +1834,8 @@ plot v(in) v(out)
 <img width="910" height="713" alt="image" src="https://github.com/user-attachments/assets/fd1ae7b2-4fbe-4c42-a179-00286210a75d" />
 
 ## Cascode Amplifier Using MosLoad
+
+### DC Analysis
 ```
 ******************** Cascode Amplifier with resistive load ********************
 ******************** DC ANALYSIS **********************************************
@@ -1891,6 +1893,98 @@ plot deriv(v(out))
 
 
 <img width="502" height="338" alt="image" src="https://github.com/user-attachments/assets/8bca9469-5dcb-4c5a-937f-56154ee32b40" />
+
+
+### AC Analysis
+```
+**************** Cascode Amplifier with Mosload Load ****************
+**************** AC ANALYSIS ****************************************
+
+.title Cascode Amplifier (Mosload Load)
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd vdd
+.temp 27
+
+* NMOS devices (cascode)
+xmn1 Dn1 in  gnd gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+xmn2 Out Gn2 Dn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+
+* Resistive load
+Rload vdd Out 8k
+
+* Small load capacitance
+Cl out gnd 10p
+
+* Supply and bias
+Vdd  vdd gnd dc 1.8
+Vbn2 Gn2 gnd dc 1.3283
+
+* AC input (biased)
+Vin in gnd dc 0.84 ac 1
+
+* AC sweep
+.ac dec 10 1 1G
+
+.control
+run
+set color0=white
+plot vdb(out)
+plot ph(out)*180/pi
+.endc
+
+.end
+```
+
+<img width="503" height="440" alt="image" src="https://github.com/user-attachments/assets/642e99b4-a841-4796-8664-489af9d6e0ef" />
+
+<img width="503" height="440" alt="image" src="https://github.com/user-attachments/assets/7f591842-61f0-4304-81be-c299ad755eca" />
+
+### Transient Analysis
+```
+******************* Cascode Amplifier with Resistive Load (Transient) *******************
+
+.title Cascode Amplifier with NMOS Driver and Resistive Load - Transient Analysis
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd vdd
+.temp 27
+
+xmn1 Dn1 in  gnd gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+xmn2 out Gn2 Dn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+
+Rd  Rt1 out 8k
+Cl  out gnd 10p
+Vcm vdd Rt1 dc 0
+
+vsup vdd gnd dc 1.8
+Vb2  Gn2 gnd dc 1.3283
+
+* Transient input (sine signal around bias point)
+Vin in gnd dc 0.84 sin(0.84 1m 100k)
+
+.tran 10n 100u
+
+.control
+run
+set color0=white
+plot v(in) v(out)
+.endc
+
+.end
+```
+
+<img width="937" height="717" alt="image" src="https://github.com/user-attachments/assets/b16346ae-116a-424d-88a6-36b3e6758f1f" />
+
+
+
+
+
+
+
+
 
 
 
