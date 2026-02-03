@@ -1716,12 +1716,181 @@ $$
 | Common Gate    | Low | High | Current buffer (Current gain $\approx 1$) |
 
 
+### DC Analysis
+```
+
+******************* Cascode Amplifier with Resistive Load (DC) *******************
+
+.title Cascode Amplifier with NMOS Driver and Resistive Load
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd vdd
+.temp 27
+
+xmn1 Dn1 in  gnd gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+xmn2 out Gn2 Dn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+
+Rd  Rt1 out 8k
+Cl  out gnd 10p
+Vcm vdd Rt1 dc 0
+
+vsup vdd gnd dc 1.8
+Vb2  Gn2 gnd dc 1.3283
+Vin  in  gnd dc 0
+
+.dc Vin 0 1.8 0.01
+
+.control
+run
+set color0=white
+plot v(out)
+plot v(Dn1)
+plot i(Vcm)
+.endc
+
+.end
+```
+
+<img width="703" height="541" alt="image" src="https://github.com/user-attachments/assets/dc8cc22f-3e96-4f14-b3ee-078bf9b4bef5" />
+
+<img width="701" height="537" alt="image" src="https://github.com/user-attachments/assets/043c2fae-5e4e-4abc-9748-f3dbe323c4d1" />
+
+<img width="701" height="538" alt="image" src="https://github.com/user-attachments/assets/8907d5fe-0d71-4d1b-a9f3-eb658f5144e4" />
+
+### AC Analysis 
+```
+******************* Cascode Amplifier with Resistive Load (AC) *******************
+
+.title Cascode Amplifier with NMOS Driver and Resistive Load - AC Analysis
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd vdd
+.temp 27
+
+xmn1 Dn1 in  gnd gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+xmn2 out Gn2 Dn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+
+Rd  Rt1 out 8k
+Cl  out gnd 10p
+Vcm vdd Rt1 dc 0
+
+vsup vdd gnd dc 1.8
+Vb2  Gn2 gnd dc 1.3283
+
+* AC input source (small signal)
+Vin in gnd dc 0.84 ac 1
+
+.ac dec 10 1 1G
+
+.control
+run
+set color0=white
+plot db(v(out))
+plot ph(v(out))*180/pi
+.endc
+
+.end
+```
+<img width="698" height="540" alt="image" src="https://github.com/user-attachments/assets/072f9bbc-7023-42ff-9d30-11a4205b9e3e" />
+
+<img width="727" height="510" alt="image" src="https://github.com/user-attachments/assets/b24313af-5a8f-49b1-a3cd-e7a747e29ac3" />
+
+### Transient Analysis
+```
+******************* Cascode Amplifier with Resistive Load (Transient) *******************
+
+.title Cascode Amplifier with NMOS Driver and Resistive Load - Transient Analysis
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd vdd
+.temp 27
+
+xmn1 Dn1 in  gnd gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+xmn2 out Gn2 Dn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+
+Rd  Rt1 out 8k
+Cl  out gnd 10p
+Vcm vdd Rt1 dc 0
+
+vsup vdd gnd dc 1.8
+Vb2  Gn2 gnd dc 1.3283
+
+* Transient input (sine signal around bias point)
+Vin in gnd dc 0.84 sin(0.84 1m 100k)
+
+.tran 10n 100u
+
+.control
+run
+set color0=white
+plot v(in) v(out)
+.endc
+
+.end
+```
+<img width="910" height="713" alt="image" src="https://github.com/user-attachments/assets/fd1ae7b2-4fbe-4c42-a179-00286210a75d" />
+
+## Cascode Amplifier Using MosLoad
+```
+******************** Cascode Amplifier with resistive load ********************
+******************** DC ANALYSIS **********************************************
+
+.title Cascode Amplifier with NMOS Driver and Resistive Load
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
 
 
+.global gnd vdd
+.temp 27
+
+* NMOS transistors
+xmn1 Dn1 in gnd gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+xmn2 Out Gn2 Dn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+
+* PMOS load (acting as resistive load)
+xmp1 Out Gp1 Ds1 vdd sky130_fd_pr__pfet_01v8_lvt w=5 l=2 m=14
+
+* Biasing and load elements
+Vcm vdd Ds1 dc 0
+Cl out gnd 10p
+
+* Supplies and bias voltages
+Vsup vdd gnd dc 1.8
+Vbn2 Gn2 gnd dc 1.3283
+Vbp1 Gp1 gnd dc 0.998
+
+* Input DC sweep source
+Vin in gnd dc 0.84
+
+* DC sweep
+.dc Vin 0 1.8 0.001
+
+.control
+run
+set color0=white
+plot v(Out) v(Dn1)
+plot v(Out)
+plot v(Dn1)
+plot i(Vcm)
+plot deriv(v(out))
+.endc
+
+.end
+```
+
+<img width="502" height="338" alt="image" src="https://github.com/user-attachments/assets/f34f6d87-6e80-42dc-aace-36a19d1ca791" />
+
+<img width="502" height="337" alt="image" src="https://github.com/user-attachments/assets/68ef18d1-b29e-49cf-a744-a32b1881e8cc" />
+
+<img width="502" height="338" alt="image" src="https://github.com/user-attachments/assets/ce2bb071-4f4a-48e0-bc62-24eb821c3df6" />
+
+<img width="502" height="338" alt="image" src="https://github.com/user-attachments/assets/2f751e25-867b-4df4-bcf1-87bfc4a3ebd1" />
 
 
-
-
+<img width="502" height="338" alt="image" src="https://github.com/user-attachments/assets/8bca9469-5dcb-4c5a-937f-56154ee32b40" />
 
 
 
