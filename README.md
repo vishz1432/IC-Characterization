@@ -1707,6 +1707,15 @@ $$
 
 
 
+# Summary of MOSFET Amplifiers
+
+| Amplifier        | $R_{in}$ | $R_{out}$ | Extra |
+|-----------------|--------|---------|-------|
+| Common Source  | $\infty$ | High | High voltage gain (Voltage amplification) |
+| Common Drain   | $\infty$ | Low  | Voltage buffer (Voltage gain $\approx 1$) |
+| Common Gate    | Low | High | Current buffer (Current gain $\approx 1$) |
+
+
 
 
 
