@@ -846,7 +846,7 @@ meas tran vmin MIN v(out)
 # 3. Amplifier 
 
 
-### 3.1  Single Stage Amplifier 
+## 3.1  Single Stage Amplifier 
 - Common Source configuration.
   - Resistive Load .
   - Mosfet Load or Diode Load .
@@ -865,8 +865,1152 @@ meas tran vmin MIN v(out)
    - Input swing.
    - Output swing.
 
-### 3.1.1 Common Source Amplifier with Resistive Load.
+### 3.1.1(A) Common Source Amplifier with Resistive Load.
 ![WhatsApp Image 2026-01-21 at 8 53 04 PM](https://github.com/user-attachments/assets/3fa01a7a-d4c6-47df-aac1-a7144b57d520)
+
+## Specification For Designing:
+
+| Parameter | Description | Value |
+|---------|------------|-------|
+| VDD | Supply Voltage | 1.8 V |
+| Technology Node | Process | 130 nm |
+| Vbias | Bias Voltage | 1.8 V |
+| VDS | Drain–Source Voltage | 0.9 V |
+| VGS | Gate–Source Voltage | 1.0 V |
+| Vt | Threshold Voltage | 0.55 V |
+| W | Transistor Width | 10 µm |
+| L | Transistor Length | 2 µm |
+| CL | Load Capacitance | 10 pF |
+| RD | Drain Resistance | 10 kΩ |
+| KP (μnCox) | Transconductance Parameter | 220 µA/V² |
+| λ | Channel Length Modulation | 0.05 V⁻¹ |
+| gm | Transconductance | Extracted from AC analysis |
+| ro | Output Resistance | Extracted from AC analysis |
+| Av | Voltage Gain | Extracted from AC analysis |
+| BW | Bandwidth | >= 2 MHz |
+| UGB | Unity Gain Bandwidth | >= 10 MHz |
+
+### Spice Code
+
+```
+
+.title CS Amplifier with NMOS Driver and Resistive Load
+
+.lib /home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.global gnd
+.temp 27
+
+XM1 out in gnd gnd sky130_fd_pr__nfet_01v8 w=10 l=2 m=2
+RD  avdd out 7.7K
+CL  out gnd 10p
+
+*vgs in gnd dc 0.9 ac -1
+vsup avdd gnd dc 1.8
+Vin  in gnd dc 0.9 ac -1 sin(0 1m 1000)
+
+.op
+.dc vgs 0 1.8 0.01
+.ac dec 20 1 1G
+.tran 20u 1n
+
+.control
+run
+set color0=white
+print v(out)
+plot v(in) v(out)
+plot db20(v(out)/v(in))
+plot ph(v(out)/v(in))
+.end
+.endc
+```
+
+### 3.1.2(B) Common Source Amplifier Using Diode Load
+<img width="606" height="468" alt="image" src="https://github.com/user-attachments/assets/b753c156-d9a6-414e-9f64-b54845768800" />
+
+
+***Small Signal Analysis***
+
+<img width="578" height="305" alt="Screenshot 2026-02-02 115616" src="https://github.com/user-attachments/assets/ce3b3df9-e5ca-4977-a1c5-2961b7a3134a" />
+
+- Gain : -gm1 (ron // 1/gm2)
+- Rin : infinity
+- Rout : 1/gm2
+
+
+### 3.1.3 (C) Design of CS Amplifier With Current Source Load 
+
+<img width="551" height="405" alt="image" src="https://github.com/user-attachments/assets/4466fa49-a8bb-4a79-bfdd-f58f2ef540e8" />
+
+
+- Gain : -gm (ro1 // ro2)
+- Rout : (ro1 // ro2) which is approx 100kohm
+- UGB : gm/2picl  , which is less than 10 mhz.
+
+Using Some Specification We will design the Circuit.\
+
+### DC Analysis :
+
+```
+**************** Common Source Amplifier with N-Channel MOSFET and Current Source Load ****************
+**************** DC ANALYSIS ****************
+
+.title CS Amplifier with NMOS Driver and PMOS Current Source Load
+
+.lib /home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.global gnd vdd
+.temp 27
+
+* NMOS driver
+xm1 out in gnd gnd sky130_fd_pr__nfet_01v8 w=7 l=2 m=2
+
+* Current source NMOS bias
+xm2 Dp2 Gn2 gnd gnd sky130_fd_pr__nfet_01v8 w=7 l=2 m=2
+
+* PMOS load (current mirror)
+xmp1 Dp1 Dp2 vdd vdd sky130_fd_pr__pfet_01v8_lvt w=7 l=2 m=6
+xmp2 Dp2 Dp2 vdd vdd sky130_fd_pr__pfet_01v8_lvt w=7 l=2 m=6
+
+* Bias voltages
+Vcm1 Dp1 out dc 0
+Vcm2 Dp2 Dn2 dc 0
+
+* Load capacitance
+Cl out gnd 10p
+
+* Supply
+vsup vdd gnd dc 1.8
+
+* Input
+Vin in gnd dc 0.9 ac 1 sin(0.9 1m 100k)
+
+* Bias for current source
+Vbn1 Gn2 gnd dc 0.9
+
+* DC sweep
+
+*.dc Vbn1 0 1.8 0.01
+.dc Vin 0 1.8 0.01
+
+.control
+run
+set color0=white
+plot v(out) v(Dp2)
+plot i(Vcm1) i(Vcm2)
+print abs(v(Dp2))
+.endc
+
+.end
+```
+<img width="502" height="342" alt="image" src="https://github.com/user-attachments/assets/aaaa6685-42ea-415f-807a-c34ff7d98994" />
+
+<img width="502" height="342" alt="image" src="https://github.com/user-attachments/assets/41268990-7d2f-4292-b472-f07b69db4a25" />
+
+
+### AC Analysis:
+
+```
+**************** Common Source Amplifier with N-Channel MOSFET and Current Source Load ****************
+**************** AC ANALYSIS ****************
+
+.title CS Amplifier with NMOS Driver and PMOS Current Source Load
+
+.lib /home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.global gnd vdd
+.temp 27
+
+* NMOS driver
+xm1 out in gnd gnd sky130_fd_pr__nfet_01v8 w=7 l=2 m=2
+
+* NMOS current source bias
+xm2 Dn2 Gn2 gnd gnd sky130_fd_pr__nfet_01v8 w=7 l=2 m=2
+
+* PMOS current mirror load
+xmp1 Dp1 Dp2 vdd vdd sky130_fd_pr__pfet_01v8_lvt w=7 l=2 m=6
+xmp2 Dp2 Dp2 vdd vdd sky130_fd_pr__pfet_01v8_lvt w=7 l=2 m=6
+
+* Bias voltages
+Vcm1 Dp1 out dc 0
+Vcm2 Dp2 Dn2 dc 0
+
+* Load capacitance
+Cl out gnd 10p
+
+* Supply voltage
+vsup vdd gnd dc 1.8
+
+* Input source (AC small signal = 1)
+Vin in gnd dc 0.9 ac 1 sin(0.9 1m 100k)
+
+* Bias for current source
+Vbn1 Gn2 gnd dc 0.9
+
+* -------- AC SWEEP --------
+.ac dec 20 1 1G
+
+.control
+run
+set color0=white
+
+plot v(in) abs(v(out)) xlabel 'Frequency' ylabel 'Gain(mag)'
+plot abs(v(out))/v(in) xlabel 'Frequency' ylabel 'Gain(mag)'
+plot vdb(out) xlabel 'Frequency' ylabel 'Gain(dB)'
+plot ph(out)*(180/pi) xlabel 'Frequency' ylabel 'Phase(Deg)'
+
+print vdb(out)
+
+.endc
+
+.end
+```
+<img width="707" height="543" alt="image" src="https://github.com/user-attachments/assets/71fac3f4-2e87-4a00-bb62-6da0b7cab3a7" />
+<img width="702" height="540" alt="image" src="https://github.com/user-attachments/assets/f4457234-bf4d-482f-a5b7-458cddb57a23" />
+<img width="702" height="538" alt="image" src="https://github.com/user-attachments/assets/a36fbbe9-e25d-40cc-8714-48db54ff2c6c" />
+<img width="703" height="533" alt="image" src="https://github.com/user-attachments/assets/0029b27e-e0d7-42e7-99d1-d8625ae55f4b" />
+
+### Transient Analysis :
+```
+**************** Common Source Amplifier with N-Channel MOSFET and Current Source Load ****************
+**************** TRANSIENT ANALYSIS **********************
+
+
+.title CS Amplifier with NMOS Driver and PMOS Current Source Load
+
+.lib /home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.global gnd vdd
+.temp 27
+
+* NMOS driver
+xm1 out in gnd gnd sky130_fd_pr__nfet_01v8 w=7 l=2 m=2
+
+* NMOS current source bias
+xm2 Dn2 Gn2 gnd gnd sky130_fd_pr__nfet_01v8 w=7 l=2 m=2
+
+* PMOS current mirror load
+xmp1 Dp1 Dp2 vdd vdd sky130_fd_pr__pfet_01v8_lvt w=7 l=2 m=6
+xmp2 Dp2 Dp2 vdd vdd sky130_fd_pr__pfet_01v8_lvt w=7 l=2 m=6
+
+* Bias voltages
+Vcm1 Dp1 out dc 0
+Vcm2 Dp2 Dn2 dc 0
+
+* Load capacitance
+Cl out gnd 10p
+
+* Supply voltage
+vsup vdd gnd dc 1.8
+
+* Input signal
+Vin in gnd dc 0.9 ac 1 sin(0.9 1m 10k)
+
+* Bias for current source
+Vbn1 Gn2 gnd dc 0.9
+
+* -------- TRANSIENT ANALYSIS --------
+.tran 1n 1000u
+.control
+run
+set color0=white
+plot v(in)
+plot v(out)
+
+.endc
+
+.end
+```
+<img width="931" height="691" alt="image" src="https://github.com/user-attachments/assets/5de0bfa8-1025-41e3-a88b-088a1187f9a2" />
+
+<img width="931" height="692" alt="image" src="https://github.com/user-attachments/assets/4de0f94b-75eb-4356-a381-b598b71972ed" />
+
+
+### 3.1.4 (D) CS Amplifier With Source Degenrated Resistor 
+
+<img width="737" height="576" alt="image" src="https://github.com/user-attachments/assets/b0a32fbd-b404-4a63-9e28-3f61de3ccb02" />
+
+
+- Gm : -gm roRd / ro + Rs + gmroRs + Rd
+- Rout : ro // Rd
+- UGB : 1/2pi RoutCL , which is 6.30 MHz
+- BW : 2.03 MHz
+
+### DC Analysis :
+
+```
+**************** Common Source Amplifier with Resistive Load and Source Degeneration Resistance ****************
+**************** DC ANALYSIS ****************
+
+.title Source Degenerated CS Amplifier with NMOS Driver and Resistive Load
+
+.lib /home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.global gnd vdd
+.temp 27
+
+* NMOS transistor
+xm1 out in Sn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+
+* Load and source resistances
+Rd vdd net1 8k
+Rs Sn1 gnd 0.8k
+
+* Voltage monitor (for current measurement)
+Vcm net1 out dc 0
+
+* Load capacitance
+Cl out gnd 10p
+
+* Supply voltage
+vsup vdd gnd dc 1.8
+
+* Input voltage
+Vin in gnd dc 0.85 ac 1 sin(0.9 1m 100k)
+
+* -------- DC SWEEP --------
+
+*.dc Vbn1 0 1.8 0.01
+.dc Vin 0 1.8 0.01
+
+.control
+run
+set color0=white
+
+plot v(out) v(Sn1)
+plot i(Vcm)
+plot deriv(v(out))
+.endc
+.end
+```
+<img width="698" height="535" alt="image" src="https://github.com/user-attachments/assets/7d151686-ef7f-461c-a84b-c9ed3ba89fdc" />
+
+<img width="702" height="540" alt="image" src="https://github.com/user-attachments/assets/8ea55c49-c768-4122-bb58-6a2fea1f06d7" />
+
+<img width="701" height="540" alt="image" src="https://github.com/user-attachments/assets/f879069c-38f7-410e-af16-3ebd8cabf748" />
+
+### AC Analysis :
+
+```
+**************** Common Source Amplifier with Resistive Load and Source Degeneration Resistance ****************
+**************** AC ANALYSIS *************
+
+
+.title Source Degenerated CS Amplifier with NMOS Driver and Resistive Load
+
+.lib /home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.global gnd vdd
+.temp 27
+
+* NMOS transistor
+xm1 out in Sn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+
+* Load and source resistances
+Rd vdd net1 8k
+Rs Sn1 gnd 0.8k
+
+* Voltage monitor
+Vcm net1 out dc 0
+
+* Load capacitance
+Cl out gnd 10p
+
+* Supply voltage
+vsup vdd gnd dc 1.8
+
+* Input voltage (AC small-signal = 1)
+Vin in gnd dc 0.85 ac 1 sin(0.9 1m 100k)
+
+* -------- AC SWEEP --------
+.ac dec 10 1 10meg
+
+.control
+run
+set color0=white
+
+plot abs(v(out))
+plot vdb(out)
+plot ph(out)*(180/pi)
+
+.endc
+
+.end
+```
+<img width="692" height="535" alt="image" src="https://github.com/user-attachments/assets/3c5c4750-fbd5-4d1b-9d14-dcb94b924dea" />
+
+<img width="705" height="540" alt="image" src="https://github.com/user-attachments/assets/c8218c06-b57e-43ce-9d97-9f19a5c9e4d2" />
+
+<img width="706" height="541" alt="image" src="https://github.com/user-attachments/assets/a32cdc42-7da5-4b5d-bf16-3ac0c34f32c1" />
+
+
+ON Using Extra 'RS' Value
+```
+**************** Common Source Amplifier with Resistive Load and Source Degeneration Resistance ****************
+**************** DC ANALYSIS ****************
+
+.title Source Degenerated CS Amplifier with NMOS Driver and Resistive Load
+
+.lib /home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+
+.global gnd vdd
+.temp 27
+
+* NMOS transistor
+xm1 out in Sn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+
+* Load and source resistances
+Rd vdd net1 8k
+Rs Sn1 gnd 0.8k
+
+* Voltage monitor (for current)
+Vcm net1 out dc 0
+
+* Load capacitance
+Cl out gnd 10p
+
+* Supply voltage
+vsup vdd gnd dc 1.8
+
+* Input voltage
+Vin in gnd dc 0.85 ac 1 sin(0.9 1m 100k)
+
+* -------- DC SWEEP --------
+
+*.dc Vbn1 0 1.8 0.01
+.dc Vin 0 1.8 0.01 Rs 0 0.8k 0.2k
+
+.control
+run
+set color0=white
+
+plot v(out) v(Sn1)
+plot i(Vcm)
+plot deriv(v(out))
+
+.endc
+
+.end
+```
+<img width="698" height="536" alt="image" src="https://github.com/user-attachments/assets/925408d6-4bdd-4a63-915a-b42693068f3b" />
+
+<img width="698" height="532" alt="image" src="https://github.com/user-attachments/assets/53ec86f8-638a-4f23-a6f5-65106557e163" />
+
+<img width="698" height="535" alt="image" src="https://github.com/user-attachments/assets/379808ab-41f0-4b01-a3fb-ad2ff851dbfa" />
+
+
+## 3.2 Common Drain or (Source Follower)
+
+<img width="565" height="388" alt="Screenshot 2026-02-02 203032" src="https://github.com/user-attachments/assets/dd3c9037-f65c-4988-b7b1-3ef6f4742477" />
+
+- Rout : 1/gm
+- Rin : infinite
+- Gain : gm(Rs // ro) / 1 + gm(Rs // ro)
+
+### DC Analysis :
+```
+******************* Common Drain Amplifier with resistive load *******************
+******************* DC ANALYSIS *************************************************
+
+
+
+.title Common Drain Amplifier with Resistive Load
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd vdd
+.temp 27
+
+xmn1 Dn1 in out gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+Rs  out gnd 5k
+*RL  Out Gnd 8
+Vcm vdd Dn1 dc 0
+Cl  out gnd 10p
+
+vsup vdd gnd dc 1.8
+Vin  in gnd dc 1.5 ac 1 sin(1.438 1m 100k)
+
+*.dc Vbn1 0 1.8 0.01
+.dc Vin 0 1.8 0.01
+
+.control
+run
+set color0=white
+plot v(out)
+plot i(Vcm)
+plot deriv(v(out))
+.endc
+
+.end
+```
+<img width="601" height="542" alt="image" src="https://github.com/user-attachments/assets/782e4ed4-1a76-4672-87a5-f349936796e8" />
+
+<img width="601" height="543" alt="image" src="https://github.com/user-attachments/assets/598a53b2-a5e9-4a38-bee7-d5a657ec1543" />
+
+<img width="603" height="543" alt="image" src="https://github.com/user-attachments/assets/7f7ecaeb-b843-4081-888c-542a04c4574a" />
+
+### AC analysis :
+```
+******************* Common Drain Amplifier with resistive load *******************
+******************* AC ANALYSIS *************************************************
+
+
+
+.title Common Drain Amplifier with Resistive Load
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd vdd
+.temp 27
+
+xmn1 Dn1 in out gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+Rs  out gnd 5k
+*RL Out Gnd 8
+Vcm vdd Dn1 dc 0
+Cl  out gnd 10p
+
+vsup vdd gnd dc 1.8
+Vin  in gnd dc 1.5 ac 1 sin(1.438 1m 100k)
+
+*.dc Vbn1 0 1.8 0.01
+.ac dec 10 1 10G
+
+.control
+run
+set color0=white
+plot v(out)
+*plot vdb(out)
+plot ph(out)*(180/pi)
+.endc
+
+.end
+```
+<img width="706" height="542" alt="image" src="https://github.com/user-attachments/assets/915dd5a4-c210-464d-b3dd-e7530411876c" />
+
+<img width="706" height="541" alt="image" src="https://github.com/user-attachments/assets/29744b4e-c171-469e-9aca-4ec68f61c674" />
+
+### Transient Analysis:
+```
+****************** Common Drain Amplifier with resistive load *******************
+*******************  Transient ANALYSIS *************************************************
+
+.title Common Drain Amplifier with Resistive Load
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd vdd
+.temp 27
+
+xmn1 Dn1 in out gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+Rs  out gnd 5k
+*RL Out Gnd 8
+Vcm vdd Dn1 dc 0
+Cl  out gnd 10p
+
+vsup vdd gnd dc 1.8
+Vin  in gnd dc 1.5 ac 1 sin(1.438 300m 100k)
+
+.tran 10p 100u
+
+.control
+run
+set color0=white
+plot v(in) v(out)
+.endc
+
+.end
+```
+<img width="9905" height="681" alt="image" src="https://github.com/user-attachments/assets/f033a2ba-3a7c-4fbf-bdfc-999f514c12db" />
+
+## Common Drain Using Mosfet Load 
+```
+******************* Common Drain Amplifier with MOSFET load *******************
+******************* DC ANALYSIS **********************************************
+
+.title Common Drain Amplifier with MOSFET Load
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd vdd
+.temp 27
+
+xmn1 Dn1 in out gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+xmn2 out Gn2 gnd gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+*RL out gnd 10
+Vcm vdd Dn1 dc 0
+Cl  out gnd 10p
+
+Vsup  vdd gnd dc 1.8
+Vbias Gn2 gnd dc 0.85
+Vin   in  gnd dc 1.5 ac 1 sin(1.8 1m 100k)
+
+*.dc Vbn1 0 1.8 0.01
+.dc Vin 0 1.8 0.01
+
+.control
+run
+set color0=white
+plot v(out)
+plot i(Vcm)
+plot deriv(v(out))
+.endc
+
+.end
+```
+<img width="699" height="537" alt="image" src="https://github.com/user-attachments/assets/b0bdf65d-61de-4a3b-99d4-3284b8a7d6e1" />
+
+<img width="701" height="537" alt="image" src="https://github.com/user-attachments/assets/e38d14ce-a12b-43e6-9365-74a1b4b1522b" />
+
+<img width="699" height="537" alt="image" src="https://github.com/user-attachments/assets/54030d3c-b491-4730-a252-161bb70253c3" />
+
+## 3.3 Common Gate Amplifier 
+<img width="572" height="575" alt="image" src="https://github.com/user-attachments/assets/69fa5f31-9eb9-45bc-82b3-634bd335e66a" />
+
+
+
+
+- ro : 200 kohm
+- Gm : -(gm + 1/ro)
+   - 667micros
+- Rout : (ro // Rd)
+- Gain : gm (ro // Rd)
+   - 5.16
+
+
+### DC Analysis
+
+```
+******************* Common Gate Amplifier with N-Channel MOSFET and Resistive Load *******************
+
+
+.title CG Amplifier with NMOS Driver and Resistive Load
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd
+.temp 27
+
+xmn1 out Gn1 Sn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+Rd  Rt1 out 8k
+*Rs  Rt2 gnd 2k
+Cl  out gnd 10p
+Vcm vdd Rt1 dc 0
+
+vsup vdd gnd dc 1.8
+Vgs  Gn1 gnd dc 1.2
+Vss  Sn1 Rt2 dc 0 ac 1 sin(0.2 10m 1k)
+
+.dc Vgs 0 1.8 0.01
+*.ac dec 10 1 1G
+*.tran 20u 1n
+
+.control
+run
+set color0=white
+plot i(Vcm)
+plot v(Sn1) v(out)
+*plot db(out)
+*plot ph((out)*180/pi)
+.endc
+
+.end
+```
+<img width="702" height="541" alt="image" src="https://github.com/user-attachments/assets/609f3a15-82b0-4159-94ed-4780b06740d5" />
+
+<img width="702" height="547" alt="image" src="https://github.com/user-attachments/assets/6a7f9e90-461f-4302-ba98-da3a3b4b2d52" />
+
+### AC Analysis :
+
+```
+******************* Common Gate Amplifier with N-Channel MOSFET and Resistive Load *******************
+
+.title CG Amplifier with NMOS Driver and Resistive Load
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd
+.temp 27
+
+xmn1 out Gn1 Sn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+Rd  Rt1 out 8k
+*Rs Rt2 gnd 2k
+Cl  out gnd 10p
+Vcm vdd Rt1 dc 0
+
+vsup vdd gnd dc 1.8
+Vgs  Gn1 gnd dc 1.08104
+Vss  Sn1 gnd dc 0.2 ac 1 sin(0.2 10m 1k)
+
+*.dc Vgs 0 1.8 0.01
+.ac dec 10 1 1G
+*.tran 20u 1n
+
+.control
+run
+set color0=white
+plot i(Vss) i(Vcm)
+plot v(Sn1) v(Rt1) v(out)
+plot db(out) db(Sn1)
+plot ph(out)*(180/pi)
+.endc
+
+.end
+```
+<img width="698" height="536" alt="image" src="https://github.com/user-attachments/assets/efdf262f-f79b-4478-bf47-7a51fde02d7c" />
+
+<img width="702" height="538" alt="image" src="https://github.com/user-attachments/assets/7812bd9e-2a6f-4c99-b161-f4b264faf328" />
+
+<img width="700" height="532" alt="image" src="https://github.com/user-attachments/assets/b223fd81-091a-45b1-b390-f7f2d8da50b9" />
+
+<img width="702" height="542" alt="image" src="https://github.com/user-attachments/assets/db1c3586-8f48-472a-ae15-f0167b8bb8f4" />
+
+### Transient Analysis 
+```
+******************* Common Gate Amplifier – Transient Analysis *******************
+
+.title CG Amplifier with NMOS Driver and Resistive Load
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd
+.temp 27
+
+xmn1 out Gn1 Sn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+Rd  Rt1 out 8k
+Cl  out gnd 10p
+Vcm vdd Rt1 dc 0
+
+vsup vdd gnd dc 1.8
+Vgs  Gn1 gnd dc 1.0813
+Vss  Sn1 gnd sin(0.2 10m 1k)
+
+.tran 1u 10m
+
+.control
+run
+set color0=white
+plot v(Sn1) v(out)
+.endc
+
+.end
+```
+<img width="1841" height="1015" alt="image" src="https://github.com/user-attachments/assets/7ada3da2-231e-4e47-9ab9-dde8c31ced3a" />
+
+
+
+
+
+
+
+
+## 3.4 Cascode Configuration amplifier (IN Single Stage)
+
+<img width="563" height="498" alt="image" src="https://github.com/user-attachments/assets/ec4a1711-29d8-4a60-a4c2-689b4be67743" />
+
+### Cascode Amplifier Gain Derivation
+
+$$
+Gain = - g_m R_{out}
+$$
+
+$$
+g_m = \frac{I_{sc}}{V_{in}}
+$$
+
+$$
+R_{out} = \text{Output Resistance}
+$$
+
+
+$$
+V_{out} = - i_{out} R_D
+$$
+
+$$
+i_{out} = - \frac{V_{out}}{R_D}
+$$
+
+$$
+i_{out} = g_m V_{in} + \frac{V_s}{r_{o1}}
+$$
+
+
+$$
+-\frac{V_{out}}{R_D} = g_m V_{in} + \frac{V_s}{r_{o1}}
+$$
+
+$$
+V_s = V_{out} - ( i_{out} + g_{m2} V_s ) r_{o2}
+$$
+
+$$
+V_s + g_{m2} r_{o2} V_s = V_{out} - i_{out} r_{o2}
+$$
+
+$$
+V_s ( 1 + g_{m2} r_{o2} ) = V_{out} - i_{out} r_{o2}
+$$
+
+$$
+V_s = \frac{V_{out} - i_{out} r_{o2}}{1 + g_{m2} r_{o2}}
+$$
+
+$$
+V_s = \frac{V_{out} + \frac{V_{out} r_{o2}}{R_D}}{1 + g_{m2} r_{o2}}
+$$
+
+
+$$
+V_s = \frac{V_{out} \left( 1 + \frac{r_{o2}}{R_D} \right)}{1 + g_{m2} r_{o2}}
+$$
+
+
+$$
+\frac{V_{out}}{V_{in}} = - g_{m1} R_D
+\left(
+\frac{r_{o1} + g_{m2} r_{o1} r_{o2}}
+{R_D + r_{o1} + r_{o2} + g_{m2} r_{o1} r_{o2}}
+\right)
+$$
+
+$$
+V_{out}
+\left[
+\frac{R_D + r_{o1} + r_{o2} + g_{m2} r_{o1} r_{o2}}
+{R_D ( r_{o1} + g_{m2} r_{o1} r_{o2} )}
+\right]
+= - g_{m1} V_{in}
+$$
+
+### Final Voltage Gain (Cascode Amplifier)
+
+$$
+A_v = \frac{V_{out}}{V_{in}}
+= - g_{m1} R_D
+\left(
+\frac{r_{o1} + g_{m2} r_{o1} r_{o2}}
+{R_D + r_{o1} + r_{o2} + g_{m2} r_{o1} r_{o2}}
+\right)
+$$
+
+### Advantage of Cascode 
+1. Huge output impedance.
+2. Gain is High.
+3. Good PSRR (Power Supply rejection ratio).
+
+
+### Disadvantage
+1. No of transistor are more.
+2. Design is too Complex (Biasing Voltage).
+3. Swing (O/P) will be loss.
+
+
+
+
+# Summary of MOSFET Amplifiers
+
+| Amplifier        | $R_{in}$ | $R_{out}$ | Extra |
+|-----------------|--------|---------|-------|
+| Common Source  | $\infty$ | High | High voltage gain (Voltage amplification) |
+| Common Drain   | $\infty$ | Low  | Voltage buffer (Voltage gain $\approx 1$) |
+| Common Gate    | Low | High | Current buffer (Current gain $\approx 1$) |
+
+
+### DC Analysis
+```
+
+******************* Cascode Amplifier with Resistive Load (DC) *******************
+
+.title Cascode Amplifier with NMOS Driver and Resistive Load
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd vdd
+.temp 27
+
+xmn1 Dn1 in  gnd gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+xmn2 out Gn2 Dn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+
+Rd  Rt1 out 8k
+Cl  out gnd 10p
+Vcm vdd Rt1 dc 0
+
+vsup vdd gnd dc 1.8
+Vb2  Gn2 gnd dc 1.3283
+Vin  in  gnd dc 0
+
+.dc Vin 0 1.8 0.01
+
+.control
+run
+set color0=white
+plot v(out)
+plot v(Dn1)
+plot i(Vcm)
+.endc
+
+.end
+```
+
+<img width="703" height="541" alt="image" src="https://github.com/user-attachments/assets/dc8cc22f-3e96-4f14-b3ee-078bf9b4bef5" />
+
+<img width="701" height="537" alt="image" src="https://github.com/user-attachments/assets/043c2fae-5e4e-4abc-9748-f3dbe323c4d1" />
+
+<img width="701" height="538" alt="image" src="https://github.com/user-attachments/assets/8907d5fe-0d71-4d1b-a9f3-eb658f5144e4" />
+
+### AC Analysis 
+```
+******************* Cascode Amplifier with Resistive Load (AC) *******************
+
+.title Cascode Amplifier with NMOS Driver and Resistive Load - AC Analysis
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd vdd
+.temp 27
+
+xmn1 Dn1 in  gnd gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+xmn2 out Gn2 Dn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+
+Rd  Rt1 out 8k
+Cl  out gnd 10p
+Vcm vdd Rt1 dc 0
+
+vsup vdd gnd dc 1.8
+Vb2  Gn2 gnd dc 1.3283
+
+* AC input source (small signal)
+Vin in gnd dc 0.84 ac 1
+
+.ac dec 10 1 1G
+
+.control
+run
+set color0=white
+plot db(v(out))
+plot ph(v(out))*180/pi
+.endc
+
+.end
+```
+<img width="698" height="540" alt="image" src="https://github.com/user-attachments/assets/072f9bbc-7023-42ff-9d30-11a4205b9e3e" />
+
+<img width="727" height="510" alt="image" src="https://github.com/user-attachments/assets/b24313af-5a8f-49b1-a3cd-e7a747e29ac3" />
+
+### Transient Analysis
+```
+******************* Cascode Amplifier with Resistive Load (Transient) *******************
+
+.title Cascode Amplifier with NMOS Driver and Resistive Load - Transient Analysis
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd vdd
+.temp 27
+
+xmn1 Dn1 in  gnd gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+xmn2 out Gn2 Dn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+
+Rd  Rt1 out 8k
+Cl  out gnd 10p
+Vcm vdd Rt1 dc 0
+
+vsup vdd gnd dc 1.8
+Vb2  Gn2 gnd dc 1.3283
+
+* Transient input (sine signal around bias point)
+Vin in gnd dc 0.84 sin(0.84 1m 100k)
+
+.tran 10n 100u
+
+.control
+run
+set color0=white
+plot v(in) v(out)
+.endc
+
+.end
+```
+<img width="910" height="713" alt="image" src="https://github.com/user-attachments/assets/fd1ae7b2-4fbe-4c42-a179-00286210a75d" />
+
+## Cascode Amplifier Using MosLoad
+
+### DC Analysis
+```
+******************** Cascode Amplifier with resistive load ********************
+******************** DC ANALYSIS **********************************************
+
+.title Cascode Amplifier with NMOS Driver and Resistive Load
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+
+.global gnd vdd
+.temp 27
+
+* NMOS transistors
+xmn1 Dn1 in gnd gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+xmn2 Out Gn2 Dn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+
+* PMOS load (acting as resistive load)
+xmp1 Out Gp1 Ds1 vdd sky130_fd_pr__pfet_01v8_lvt w=5 l=2 m=14
+
+* Biasing and load elements
+Vcm vdd Ds1 dc 0
+Cl out gnd 10p
+
+* Supplies and bias voltages
+Vsup vdd gnd dc 1.8
+Vbn2 Gn2 gnd dc 1.3283
+Vbp1 Gp1 gnd dc 0.998
+
+* Input DC sweep source
+Vin in gnd dc 0.84
+
+* DC sweep
+.dc Vin 0 1.8 0.001
+
+.control
+run
+set color0=white
+plot v(Out) v(Dn1)
+plot v(Out)
+plot v(Dn1)
+plot i(Vcm)
+plot deriv(v(out))
+.endc
+
+.end
+```
+
+<img width="502" height="338" alt="image" src="https://github.com/user-attachments/assets/f34f6d87-6e80-42dc-aace-36a19d1ca791" />
+
+<img width="502" height="337" alt="image" src="https://github.com/user-attachments/assets/68ef18d1-b29e-49cf-a744-a32b1881e8cc" />
+
+<img width="502" height="338" alt="image" src="https://github.com/user-attachments/assets/ce2bb071-4f4a-48e0-bc62-24eb821c3df6" />
+
+<img width="502" height="338" alt="image" src="https://github.com/user-attachments/assets/2f751e25-867b-4df4-bcf1-87bfc4a3ebd1" />
+
+
+<img width="502" height="338" alt="image" src="https://github.com/user-attachments/assets/8bca9469-5dcb-4c5a-937f-56154ee32b40" />
+
+
+### AC Analysis
+```
+**************** Cascode Amplifier with Mosload Load ****************
+**************** AC ANALYSIS ****************************************
+
+.title Cascode Amplifier (Mosload Load)
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd vdd
+.temp 27
+
+* NMOS devices (cascode)
+xmn1 Dn1 in  gnd gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+xmn2 Out Gn2 Dn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+
+* Resistive load
+Rload vdd Out 8k
+
+* Small load capacitance
+Cl out gnd 10p
+
+* Supply and bias
+Vdd  vdd gnd dc 1.8
+Vbn2 Gn2 gnd dc 1.3283
+
+* AC input (biased)
+Vin in gnd dc 0.84 ac 1
+
+* AC sweep
+.ac dec 10 1 1G
+
+.control
+run
+set color0=white
+plot vdb(out)
+plot ph(out)*180/pi
+.endc
+
+.end
+```
+
+<img width="503" height="440" alt="image" src="https://github.com/user-attachments/assets/642e99b4-a841-4796-8664-489af9d6e0ef" />
+
+<img width="503" height="440" alt="image" src="https://github.com/user-attachments/assets/7f591842-61f0-4304-81be-c299ad755eca" />
+
+### Transient Analysis
+```
+******************* Cascode Amplifier with Resistive Load (Transient) *******************
+
+.title Cascode Amplifier with NMOS Driver and Resistive Load - Transient Analysis
+
+.lib "/home/vishalvlsi/share/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.global gnd vdd
+.temp 27
+
+xmn1 Dn1 in  gnd gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+xmn2 out Gn2 Dn1 gnd sky130_fd_pr__nfet_01v8 w=5 l=2 m=4
+
+Rd  Rt1 out 8k
+Cl  out gnd 10p
+Vcm vdd Rt1 dc 0
+
+vsup vdd gnd dc 1.8
+Vb2  Gn2 gnd dc 1.3283
+
+* Transient input (sine signal around bias point)
+Vin in gnd dc 0.84 sin(0.84 1m 100k)
+
+.tran 10n 100u
+
+.control
+run
+set color0=white
+plot v(in) v(out)
+.endc
+
+.end
+```
+
+<img width="937" height="717" alt="image" src="https://github.com/user-attachments/assets/b16346ae-116a-424d-88a6-36b3e6758f1f" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
