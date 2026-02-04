@@ -1392,7 +1392,7 @@ plot ph(out)*(180/pi)
 ### Transient Analysis:
 ```
 ****************** Common Drain Amplifier with resistive load *******************
-******************* AC ANALYSIS *************************************************
+*******************  Transient ANALYSIS *************************************************
 
 .title Common Drain Amplifier with Resistive Load
 
